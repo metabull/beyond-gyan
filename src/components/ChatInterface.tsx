@@ -37,9 +37,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     // Add welcome message
     const welcomeMessage: Message = {
       id: '1',
-      content: `🤖 **Welcome to your AI-powered Document Knowledge Base!**
-
-I'm your intelligent document assistant with access to permanently stored content on Irys. Here's what I can help you with:
+      content: `🤖 **Welcome to Beyond Gyan. I am your intelligent document assistant. I can access your content stored on IRYS and help you with:**
 
 📚 **Document Analysis**: Ask me questions about any documents you've added - I have access to their full content, not just summaries
 
