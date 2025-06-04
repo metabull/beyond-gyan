@@ -147,11 +147,11 @@ Try asking: "What are the main topics covered in my documents?" or "Summarize th
 
       // Handle specific error cases
       if (err.message && err.message.includes("Monthly usage limit exceeded")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits to continue using the service.";
+        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
       } else if (err.message && err.message.includes("429")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits or wait for your monthly limit to reset.";
+        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
       } else if (err.message && err.message.includes("insufficient")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits to continue.";
+        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
       }
       const errorMessageObject: Message = {
         id: generateMessageId(),
