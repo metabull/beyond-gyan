@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import MessageBubble from './MessageBubble';
-import CreditsDisplay from './CreditsDisplay';
-import DocumentSidebar from './DocumentSidebar';
-import type { Document } from '../utils/apiService';
-import { getBeyondSdk } from '../utils/beyondSdk';
-import { apiService } from '../utils/apiService';
+import React, { useState, useRef, useEffect } from "react";
+import MessageBubble from "./MessageBubble";
+import CreditsDisplay from "./CreditsDisplay";
+import DocumentSidebar from "./DocumentSidebar";
+import type { Document } from "../utils/apiService";
+import { getBeyondSdk } from "../utils/beyondSdk";
+import { apiService } from "../utils/apiService";
 
 interface Message {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -21,23 +21,25 @@ interface ChatInterfaceProps {
   onDocumentDeleted: (documentId: string) => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
-  userEmail, 
-  onSignOut, 
-  documents, 
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  userEmail,
+  onSignOut,
+  documents,
   onDocumentAdded,
-  onDocumentDeleted
+  onDocumentDeleted,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Add welcome message
     const welcomeMessage: Message = {
-      id: '1',
-      content: `🤖 **Welcome to Beyond Gyan. I am your intelligent document assistant. I can access your content stored on IRYS and help you with:**
+      id: "1",
+      content: `🤖 **Welcome to Beyond Gyan.**
+
+I am your intelligent document assistant. I can access your content stored on IRYS and help you with:
 
 📚 **Document Analysis**: Ask me questions about any documents you've added - I have access to their full content, not just summaries
 
@@ -47,11 +49,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
 🎯 **Smart Search**: Ask about specific topics and I'll reference relevant information from your documents with citations
 
-**Current Status**: ${documents.length > 0 ? `I have access to ${documents.length} document(s) in your knowledge base` : 'No documents added yet - use the sidebar to start building your knowledge base!'}
+**Current Status**: ${documents.length > 0 ? `I have access to ${documents.length} document(s) in your knowledge base` : "No documents added yet - use the sidebar to start building your knowledge base!"}
 
 Try asking: "What are the main topics covered in my documents?" or "Summarize the key insights from my stored content"`,
-      role: 'assistant',
-      timestamp: new Date()
+      role: "assistant",
+      timestamp: new Date(),
     };
     setMessages([welcomeMessage]);
   }, [userEmail, documents.length]);
@@ -61,7 +63,7 @@ Try asking: "What are the main topics covered in my documents?" or "Summarize th
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const generateMessageId = () => {
@@ -76,88 +78,106 @@ Try asking: "What are the main topics covered in my documents?" or "Summarize th
     const userMessage: Message = {
       id: generateMessageId(),
       content: inputValue.trim(),
-      role: 'user',
-      timestamp: new Date()
+      role: "user",
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
     setLoading(true);
 
     try {
       // Get enhanced context from backend API
-      console.log('🤖 Getting enhanced document context from backend...');
-      const contextData = await apiService.sendChatMessage(userMessage.content, documents.length > 0);
+      console.log("🤖 Getting enhanced document context from backend...");
+      const contextData = await apiService.sendChatMessage(
+        userMessage.content,
+        documents.length > 0,
+      );
 
-      console.log('📚 Backend provided context for', contextData.documentsUsed, 'documents');
-      console.log('📝 System prompt length:', contextData.systemPrompt.length, 'characters');
+      console.log(
+        "📚 Backend provided context for",
+        contextData.documentsUsed,
+        "documents",
+      );
+      console.log(
+        "📝 System prompt length:",
+        contextData.systemPrompt.length,
+        "characters",
+      );
 
       // Get initialized Beyond SDK
       const beyond = await getBeyondSdk();
 
       // Import CHAT_MODELS from the SDK
-      const { CHAT_MODELS } = await import('@Beyond-Network-AI/beyond-ai');
+      const { CHAT_MODELS } = await import("@Beyond-Network-AI/beyond-ai");
 
       // Create comprehensive prompt with system context + user message
       const messages = [
         {
-          role: 'system' as const,
-          content: contextData.systemPrompt
+          role: "system" as const,
+          content: contextData.systemPrompt,
         },
         {
-          role: 'user' as const,
-          content: userMessage.content
-        }
+          role: "user" as const,
+          content: userMessage.content,
+        },
       ];
 
-      console.log('🚀 Sending to Beyond AI with full document context...');
+      console.log("🚀 Sending to Beyond AI with full document context...");
 
       // Send to Beyond AI with enhanced context
       const response = await beyond.chat.createCompletion({
         model: CHAT_MODELS.LLAMA_8B,
         messages: messages,
         temperature: 0.7,
-        stream: true
+        stream: true,
       });
 
-      let aiResponseContent = '';
-      if ('content' in response) {
+      let aiResponseContent = "";
+      if ("content" in response) {
         aiResponseContent = response.content;
       } else {
-        aiResponseContent = response.choices[0]?.message?.content || 'No response generated';
+        aiResponseContent =
+          response.choices[0]?.message?.content || "No response generated";
       }
 
       const aiMessage: Message = {
         id: generateMessageId(),
         content: aiResponseContent,
-        role: 'assistant',
-        timestamp: new Date()
+        role: "assistant",
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
 
       // Log success
-      console.log('✅ AI response generated using', contextData.documentsUsed, 'documents');
-
+      console.log(
+        "✅ AI response generated using",
+        contextData.documentsUsed,
+        "documents",
+      );
     } catch (err: any) {
-      console.error('❌ Chat error:', err);
-      let errorMessage = `Sorry, I encountered an error: ${err.message || 'Unknown error'}. Please ensure you're authenticated and try again.`;
+      console.error("❌ Chat error:", err);
+      let errorMessage = `Sorry, I encountered an error: ${err.message || "Unknown error"}. Please ensure you're authenticated and try again.`;
 
       // Handle specific error cases
       if (err.message && err.message.includes("Monthly usage limit exceeded")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
+        errorMessage =
+          "You do not have enough credits to use Beyond AI Agent / chat feature.";
       } else if (err.message && err.message.includes("429")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
+        errorMessage =
+          "You do not have enough credits to use Beyond AI Agent / chat feature.";
       } else if (err.message && err.message.includes("insufficient")) {
-        errorMessage = "You do not have enough credits to use Beyond AI Agent / chat feature.";
+        errorMessage =
+          "You do not have enough credits to use Beyond AI Agent / chat feature.";
       }
       const errorMessageObject: Message = {
         id: generateMessageId(),
         content: errorMessage,
-        role: 'assistant',
-        timestamp: new Date()
+        role: "assistant",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessageObject]);
+      setMessages((prev) => [...prev, errorMessageObject]);
     } finally {
       setLoading(false);
     }
@@ -181,10 +201,10 @@ Try asking: "What are the main topics covered in my documents?" or "Summarize th
 - Use it to provide context-aware responses
 
 Try asking me: "What is this document about?" or "How does this relate to my other documents?"`,
-      role: 'assistant',
-      timestamp: new Date()
+      role: "assistant",
+      timestamp: new Date(),
     };
-    setMessages(prev => [...prev, confirmationMessage]);
+    setMessages((prev) => [...prev, confirmationMessage]);
   };
 
   const handleSignOut = async () => {
@@ -194,7 +214,7 @@ Try asking me: "What is this document about?" or "How does this relate to my oth
       await beyond.auth.email.signOut();
       onSignOut();
     } catch (err) {
-      console.error('Sign out error:', err);
+      console.error("Sign out error:", err);
       onSignOut(); // Sign out anyway
     }
   };
@@ -246,29 +266,29 @@ Try asking me: "What is this document about?" or "How does this relate to my oth
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={
-                  documents.length > 0 
+                  documents.length > 0
                     ? `Ask me anything about your ${documents.length} stored document(s)...`
                     : "Add documents first, then ask me anything about them..."
                 }
                 disabled={loading}
                 className="chat-input"
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={!inputValue.trim() || loading}
                 className="send-button"
               >
-                {loading ? '...' : 'Send'}
+                {loading ? "..." : "Send"}
               </button>
             </div>
           </form>
         </div>
 
         <div className="sidebar-section">
-          <DocumentSidebar 
+          <DocumentSidebar
             documents={documents}
-            onDocumentAdded={handleDocumentAdded} 
-            onDocumentDeleted={onDocumentDeleted} 
+            onDocumentAdded={handleDocumentAdded}
+            onDocumentDeleted={onDocumentDeleted}
           />
         </div>
       </div>
