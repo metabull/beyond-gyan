@@ -37,6 +37,13 @@ const CreditsDisplay: React.FC = () => {
     );
   };
 
+  const getCreditsDisplayClass = () => {
+    const remaining = getRemainingCredits();
+    if (remaining <= 0) return "credits-display-simple credits-empty";
+    if (remaining <= 5) return "credits-display-simple credits-low";
+    return "credits-display-simple";
+  };
+
   if (loading) {
     return (
       <div className="credits-display-simple">
@@ -48,16 +55,22 @@ const CreditsDisplay: React.FC = () => {
   if (error) {
     return (
       <div className="credits-display-simple">
-        <div className="credits-error">Error loading credits</div>
+        <div className="credits-error">Credits unavailable</div>
       </div>
     );
   }
 
+  const remainingCredits = getRemainingCredits();
+
   return (
-    <div className="credits-display-simple">
-      <span className="credits-icon">✨</span>
-      <span className="credits-count">{getRemainingCredits().toFixed(0)}</span>
-      <span className="credits-label">Beyond Credits</span>
+    <div className={getCreditsDisplayClass()}>
+      <span className="credits-icon">
+        {remainingCredits <= 0 ? "⚠️" : remainingCredits <= 5 ? "⚡" : "✨"}
+      </span>
+      <span className="credits-count">{remainingCredits.toFixed(0)}</span>
+      <span className="credits-label">
+        {remainingCredits <= 0 ? "No Credits" : "Beyond Credits"}
+      </span>
     </div>
   );
 };

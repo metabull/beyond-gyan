@@ -143,13 +143,23 @@ Try asking: "What are the main topics covered in my documents?" or "Summarize th
 
     } catch (err: any) {
       console.error('❌ Chat error:', err);
-      const errorMessage: Message = {
+      let errorMessage = `Sorry, I encountered an error: ${err.message || 'Unknown error'}. Please ensure you're authenticated and try again.`;
+
+      // Handle specific error cases
+      if (err.message && err.message.includes("Monthly usage limit exceeded")) {
+        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits to continue using the service.";
+      } else if (err.message && err.message.includes("429")) {
+        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits or wait for your monthly limit to reset.";
+      } else if (err.message && err.message.includes("insufficient")) {
+        errorMessage = "You do not have enough credits to use Beyond AI Agent. Please purchase more credits to continue.";
+      }
+      const errorMessageObject: Message = {
         id: generateMessageId(),
-        content: `Sorry, I encountered an error: ${err.message || 'Unknown error'}. Please ensure you're authenticated and try again.`,
+        content: errorMessage,
         role: 'assistant',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessageObject]);
     } finally {
       setLoading(false);
     }
