@@ -1033,8 +1033,9 @@ body {
 
   .chat-section {
     order: 1;
-    flex: 1;
-    min-height: 0;
+    flex: 0 0 50vh; /* Fixed height instead of flex: 1 */
+    min-height: 300px;
+    max-height: 50vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1045,9 +1046,9 @@ body {
     width: 100%;
     border-left: none;
     border-top: 1px solid #e1e5e9;
-    height: 40vh;
-    max-height: 40vh;
-    min-height: 200px;
+    height: calc(50vh - 80px); /* Use remaining space minus header */
+    max-height: calc(50vh - 80px);
+    min-height: 250px;
     flex-shrink: 0;
   }
 
@@ -1176,9 +1177,16 @@ body {
     font-size: 11px;
   }
 
+  .chat-section {
+    flex: 0 0 45vh;
+    max-height: 45vh;
+    min-height: 250px;
+  }
+
   .sidebar-section {
-    height: 35vh;
-    max-height: 35vh;
+    height: calc(55vh - 80px);
+    max-height: calc(55vh - 80px);
+    min-height: 200px;
   }
 
   .chat-messages {
